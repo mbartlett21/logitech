@@ -1,7 +1,10 @@
 -- This idea of using layers is inspired by qmk
 
 -- GPL2 license (may change at some point)
+-- Copyright 2023 mbartlett21
+-- Original repo: https://github.com/mbartlett21/logitech
 
+-- This is for a G402 mouse with 8 buttons
 --[[
 
 left:
@@ -16,6 +19,8 @@ left:
 |/
 ]]
 
+local MOUSE_BUTTON_COUNT = 8
+
 local MB_LFT = 1
 local MB_RGT = 3 -- oddly, these are swapped for output
 local MB_MID = 2
@@ -24,6 +29,10 @@ local MB_X2  = 5
 
 local ______ = nil
 local MB_NON = 0
+
+
+-- begin setup
+
 
 local KB_PST = { ty = 'shortcut', 'lctrl', 'v' }
 local KB_CPY = { ty = 'shortcut', 'lctrl', 'c' }
@@ -56,8 +65,8 @@ local clickmaps = {
 }
 
 
+-- end setup
 
--- Other API
 
 local curr_pressed = {}
 
@@ -66,7 +75,7 @@ local curr_layers = { true }
 local function get_code(id)
     for i = #clickmaps, 1, -1 do
         -- OutputLogMessage('i == ' .. i .. '\n')
-        if curr_layers[i] then
+        if curr_layers[i] or i == 1 then -- can't turn off default layer
             -- OutputLogMessage('checking layer ' .. i .. '\n')
             if clickmaps[i][id] then
                 return clickmaps[i][id]
@@ -77,6 +86,16 @@ local function get_code(id)
 end
 
 local interpret_down, interpret_up
+
+local function release_other_codes(code)
+    for i = 1, MOUSE_BUTTON_COUNT do
+        if curr_pressed[i] and get_code(i) ~= code then
+            -- release other keys
+            curr_pressed[i] = nil
+            interpret_up(get_code(i))
+        end
+    end
+end
 
 interpret_down = function(code)
     if type(code) == 'number' then
@@ -94,23 +113,11 @@ interpret_down = function(code)
                 interpret_down(v)
             end
         elseif code.ty == 'mo' then
-            for i = 1, 8 do
-                if curr_pressed[i] and get_code(i) ~= code then
-                    -- release other keys
-                    curr_pressed[i] = nil
-                    interpret_up(get_code(i))
-                end
-            end
+            release_other_codes(code)
 
             curr_layers[code.layer] = true
         elseif code.ty == 'to' then
-            for i = 1, 8 do
-                if curr_pressed[i] and get_code(i) ~= code then
-                    -- release other keys
-                    curr_pressed[i] = nil
-                    interpret_up(get_code(i))
-                end
-            end
+            release_other_codes(code)
 
             for i = 2, #clickmaps do
                 curr_layers[i] = nil
@@ -139,13 +146,7 @@ interpret_up = function(code)
                 interpret_up(v)
             end
         elseif code.ty == 'mo' then
-            for i = 1, 8 do
-                if curr_pressed[i] and get_code(i) ~= code then
-                    -- release other keys
-                    curr_pressed[i] = nil
-                    interpret_up(get_code(i))
-                end
-            end
+            release_other_codes(code)
 
             curr_layers[code.layer] = nil
         elseif code.ty == 'to' then
