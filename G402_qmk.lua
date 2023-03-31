@@ -22,8 +22,8 @@ left:
 local MOUSE_BUTTON_COUNT = 8
 
 local MB_LFT = 1
+local MB_MID = 2 -- this actually appears to be sending mouse button 4
 local MB_RGT = 3 -- oddly, these are swapped for output
-local MB_MID = 2
 local MB_X1  = 4
 local MB_X2  = 5
 
@@ -65,8 +65,8 @@ end
 
 local clickmaps = {
     -- left, right and mid are programmed in g hub
-    { ______, ______, ______, KB_PST, KB_CPY, MO(2),  MB_NON, MB_NON },
-    { ______, ______, ______, ______, KB_CUT, ______, TO(3),  GU_LFT },
+    { ______, ______, ______, KB_PST, KB_CPY, MO(2),  TO(3),  MB_X1 },
+    { ______, ______, ______, ______, KB_CUT, ______, ______, GU_MID },
     { ______, ______, ______, GU_MID, GU_LFT, MO(4),  TO(1),  GU_RGT },
     { ______, ______, ______, ______, ______, ______, ______, ______ }
 }
@@ -106,18 +106,15 @@ end
 
 interpret_down = function(code)
     if type(code) == 'number' then
-        if code >= MB_LFT and code <= MB_X1 then
+        if code >= MB_LFT and code <= MB_X2 then
             -- OutputLogMessage('PressMouseButton ' .. code .. '\n')
             PressMouseButton(code)
-        elseif code > MB_X1 then
-            -- probably a keycode
-            -- OutputLogMessage('PressKey ' .. code .. '\n')
-            PressKey(code)
         end
     elseif type(code) == 'table' then
         if code.ty == 'shortcut' then
             for i, v in ipairs(code) do
                 interpret_down(v)
+                Sleep(20)
             end
         elseif code.ty == 'mo' then
             release_other_codes(code)
@@ -147,18 +144,15 @@ end
 
 interpret_up = function(code)
     if type(code) == 'number' then
-        if code >= MB_LFT and code <= MB_X1 then
+        if code >= MB_LFT and code <= MB_X2 then
             -- OutputLogMessage('ReleaseMouseButton ' .. code .. '\n')
             ReleaseMouseButton(code)
-        elseif code > MB_X1 then
-            -- probably a keycode
-            -- OutputLogMessage('ReleaseKey ' .. code .. '\n')
-            ReleaseKey(code)
         end
     elseif type(code) == 'table' then
         if code.ty == 'shortcut' then
             for i, v in ipairs(code) do
                 interpret_up(v)
+                Sleep(20)
             end
         elseif code.ty == 'mo' then
             release_other_codes(code)
