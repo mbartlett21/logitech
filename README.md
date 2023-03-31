@@ -31,6 +31,8 @@ corresponding key set to `______`)
 
 `TO(x)` enables the target layer and disables all other layers (apart from the default one).
 
+`TG(x)` toggles layer `x`.
+
 Shortcuts are done using `{ ty = 'shortcut', shortcut, keys, and, clicks, here }`
 
 For keycodes, refer to the G hub lua api manual that the software provides (Script -> Scripting API)

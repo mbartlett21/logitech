@@ -56,6 +56,13 @@ local function TO(layer)
     }
 end
 
+local function TG(layer)
+    return {
+        ty = 'tg',
+        layer = layer,
+    }
+end
+
 local clickmaps = {
     -- left, right and mid are programmed in g hub
     { ______, ______, ______, KB_PST, KB_CPY, MO(2),  MB_NON, MB_NON },
@@ -123,6 +130,14 @@ interpret_down = function(code)
                 curr_layers[i] = nil
             end
             curr_layers[code.layer] = true
+        elseif code.ty == 'tg' then
+            release_other_codes(code)
+
+            if curr_layers[code.layer] then
+                curr_layers[code.layer] = nil
+            else
+                curr_layers[code.layer] = true
+            end
         end
     elseif type(code) == 'string' then
         -- OutputLogMessage('PressKey ' .. code .. '\n')
@@ -150,6 +165,8 @@ interpret_up = function(code)
 
             curr_layers[code.layer] = nil
         elseif code.ty == 'to' then
+            -- do nothing
+        elseif code.ty == 'tg' then
             -- do nothing
         end
     elseif type(code) == 'string' then
